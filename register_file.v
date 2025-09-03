@@ -15,6 +15,7 @@ module register_file (
     reg [31:0] mem [0:31]; 
 
     wire [31:0] data_A, op1, op2;
+    reg [31:0] imm_extend;
     
     integer i;
     always @(posedge clk or negedge rst_n) begin
@@ -28,7 +29,6 @@ module register_file (
     end
 
     // Read asynchronous
-
     assign data_A = mem[ins[19:15]];
     assign data_B = mem[ins[24:20]];
 
@@ -37,7 +37,6 @@ module register_file (
                 B_type = 3'b011,
                 J_type = 3'b100,
                 U_type = 3'b101;
-    reg [31:0] imm_extend;
 
     always @(immsel, ins) begin
         imm_extend    = 32'b0;

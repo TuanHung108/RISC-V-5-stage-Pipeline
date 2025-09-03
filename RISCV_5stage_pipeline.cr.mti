@@ -1,0 +1,36 @@
+C:/QuestaSim_Project/RISC-V-5-stage-pipeline/tb_memory.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-pipeline/tb_memory.v
+QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
+-- Compiling module tb_memory
+
+Top level modules:
+	tb_memory
+
+} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-pipeline/tb_writeback..v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-pipeline/tb_writeback..v
+QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
+-- Compiling module tb_writeback
+
+Top level modules:
+	tb_writeback
+
+} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-pipeline/writeback.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-pipeline/writeback.v
+QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
+-- Compiling module writeback
+
+Top level modules:
+	writeback
+
+} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-pipeline/tb_execute.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-pipeline/tb_execute.v
+QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
+-- Compiling module tb_execute
+
+Top level modules:
+	tb_execute
+
+} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-pipeline/tb_decode.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-pipeline/tb_decode.v
+QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
+-- Compiling module tb_decode
+
+Top level modules:
+	tb_decode
+
+} {} {}}
