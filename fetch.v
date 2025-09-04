@@ -3,6 +3,8 @@ module fetch (
     input pcselE,
     input [31:0] ALUresE,
     input [31:0] instrF,
+    input stallF, stallD,
+    input flushD,
 
     output [31:0] instrD,
     output [31:0] pc4D, pcD
@@ -16,7 +18,10 @@ module fetch (
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) pcF <= 32'b0;
-        else        pcF <= pc_next;
+        else begin
+            if(!stallF) pcF <= pc_next;
+            else pcF <= pcF;
+        end
     end
 
     // Declaration of register
@@ -30,9 +35,20 @@ module fetch (
             pc4F_reg <= 32'b0;
         end
         else begin
-            instrF_reg <= instrF;
-            pcF_reg <= pcF;
-            pc4F_reg <= pc4F;
+            if(flushD && !stallD) begin
+                nstrF_reg <= 32'b0;
+                pcF_reg <= 32'b0;
+                pc4F_reg <= 32'b0;
+            end else if(!stallD) begin
+                instrF_reg <= instrF;
+                pcF_reg <= pcF;
+                pc4F_reg <= pc4F;
+            end else begin
+                instrF_reg <= instrF_reg;
+                pcF_reg <= pcF_reg;
+                pc4F_reg <= pc4F_reg;
+            end
+            
         end
     end
 

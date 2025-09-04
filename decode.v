@@ -1,15 +1,17 @@
 module decode (
     input clk, rst_n,
-    input regwriteW,
-//    input [2:0] immselD,
+    input regwriteW, breqE, brltE,
     input [4:0] rdW,
     input [31:0] instrD, pcD, pc4D,
     input [31:0] resultW,
+    input flushE,
 
-    output regwriteE, memrwE,
-    output aselE, bselE,
+    output regwriteE, memrwE, 
+    output brunE, branchE, jumpE,
+    output bselE,
     output [1:0] wbselE,
     output [2:0] ALUselE,
+    output [2:0] funct3E,
     output [4:0] rdE, rs1E, rs2E,
     output [31:0] rd1E, rd2E,
     output [31:0] imm_exE,
@@ -17,18 +19,18 @@ module decode (
 );
 
     // Declaration of register
-    reg regwriteD_reg, memrwD_reg, aselD_reg, bselD_reg;
+    reg regwriteD_reg, memrwD_reg, bselD_reg, brunD_reg, branchD_reg, jumpD_reg;
     reg [1:0] wbselD_reg;
-    reg [2:0] aluselD_reg;
+    reg [2:0] aluselD_reg, funct3D_reg;
     reg [31:0] pcD_reg, pc4D_reg;
     reg [31:0] rd1D_reg, rd2D_reg, imm_exD_reg;
     reg [4:0] rdD_reg, rs1D_reg, rs2D_reg;
 
 
     // Control Unit
-    // PCSelD_ImmSelD_RegWriteD_brun_ASelD_BSelD_ALUSelD_MemRWD_WBSelD
-    wire pcselD, regwriteD, memrwD;
-    wire aselD, bselD;
+    // ImmSel_RegWrite_BrUn_Branch_Jump_Asel_Bsel_ALUSel_MemRW_WBSel
+    wire pcselD, regwriteD, memrwD, brunD, branchD, jumpD;
+    wire bselD;
     wire [1:0] wbselD;
     wire [2:0] immselD, aluselD;
     wire [4:0] rs1D, rs2D, rdD;
@@ -38,47 +40,45 @@ module decode (
     wire [6:0] funct7 = instrD[31:25];
 
     reg [13:0] control_signals;
-    assign {pcselD, immselD, regwriteD, aselD, bselD, aluselD, memrwD, wbselD} = control_signals;
+    assign {immselD, regwriteD, brunD, branchD, jumpD, bselD, aluselD, memrwD, wbselD} = control_signals;
 
-    always @(funct3, funct7, opcode/*, breq, brlt*/) begin
-        control_signals = 14'b0_000_0_0_0_000_0_00;
+
+    always @(opcode, funct3, funct7) begin
+        control_signals = 14'b000_0_0_0_0_0_000_0_00; // default
         case (opcode)
-            7'b0110011: begin
+            7'b0110011: begin // R-type
                 case (funct3)
                     3'b000: begin
                         if (funct7 == 7'b0000000)
-                            control_signals = 14'b0_000_1_0_0_000_0_01; // add
+                            control_signals = 14'b000_1_0_0_0_0_000_0_01; // add
                         else
-                            control_signals = 14'b0_000_1_0_0_001_0_01; // sub
+                            control_signals = 14'b000_1_0_0_0_0_001_0_01; // sub
                     end
-                    3'b111: control_signals = 14'b0_000_1_0_0_010_0_01; // and
-                    3'b110: control_signals = 14'b0_000_1_0_0_011_0_01; // or
-                    3'b100: control_signals = 14'b0_000_1_0_0_100_0_01; // xor
-                    default:control_signals = 14'b0_000_1_0_0_000_0_01;
+                    3'b111: control_signals = 14'b000_1_0_0_0_0_010_0_01; // and
+                    3'b110: control_signals = 14'b000_1_0_0_0_0_011_0_01; // or
+                    3'b100: control_signals = 14'b000_1_0_0_0_0_100_0_01; // xor
+                    default:control_signals = 14'b000_1_0_0_0_0_000_0_01;
                 endcase
             end
 
-            7'b0010011: control_signals = 14'b0_001_1_0_1_000_0_01; // addi
-            7'b0000011: control_signals = 14'b0_001_1_0_1_000_0_00; // lw
-            7'b1100111: control_signals = 14'b1_001_1_0_1_000_0_11; // jalr
-            7'b0100011: control_signals = 14'b0_010_0_0_1_000_1_00; // sw
+            7'b0010011: control_signals = 14'b001_1_0_0_0_1_000_0_01; // addi
+            7'b0000011: control_signals = 14'b001_1_0_0_0_1_000_0_00; // lw
+            7'b0100011: control_signals = 14'b010_0_0_0_0_1_000_1_00; // sw
+            7'b1100111: control_signals = 14'b001_1_0_0_1_1_000_0_10; // jalr
 
-            // 7'b1100011: begin
-            //     case (funct3)
-            //         3'b000: control_signals =  (breq)  ? 14'b1_011_0_0_1_1_000_0_00
-            //                                  : 14'b0_011_0_0_1_1_000_0_00; // beq
-            //         3'b001: control_signals = (!breq)  ? 14'b1_011_0_0_1_1_000_0_00
-            //                                  : 14'b0_011_0_0_1_1_000_0_00; // bne
-            //         3'b100: control_signals =  (brlt)  ? 14'b1_011_0_0_1_1_000_0_00
-            //                                  : 14'b0_011_0_0_1_1_000_0_00; // blt
-            //         3'b101: control_signals = (!brlt)  ? 14'b1_011_0_0_1_1_000_0_00
-            //                                  : 14'b0_011_0_0_1_1_000_0_00; // bge
-            //         default:control_signals = 14'b0_000_0_0_0_0_000_0_00;
-            //     endcase
-            // end
+            7'b1100011: begin // branch
+                case (funct3)
+                    3'b000: control_signals = 14'b011_0_0_1_0_1_000_0_00; // beq
+                    3'b001: control_signals = 14'b011_0_0_1_0_1_000_0_00; // bne
+                    3'b100: control_signals = 14'b011_0_0_1_0_1_000_0_00; // blt
+                    3'b101: control_signals = 14'b011_0_0_1_0_1_000_0_00; // bge
+                    default:control_signals = 14'b000_0_0_0_0_0_000_0_00;
+                endcase
+            end
 
-            7'b1101111: control_signals = 14'b1_100_1_1_1_000_0_11; // jal
-            default:    control_signals = 14'b0_000_0_0_0_000_0_00;
+            7'b1101111: control_signals = 14'b100_1_0_0_1_0_000_0_10; // jal
+
+            default: control_signals = 14'b000_0_0_0_0_0_000_0_00;
         endcase
     end
 
@@ -132,6 +132,9 @@ module decode (
             memrwD_reg <= 1'b0; 
             aselD_reg <= 1'b0;
             bselD_reg <= 1'b0;
+            brunD_reg <= 1'b0;
+            branchD_reg <= 1'b0;
+            jumpD_reg <= 1'b0;
             wbselD_reg <= 2'b0;
             aluselD_reg <= 3'b0;
             pcD_reg <= 32'b0;
@@ -142,22 +145,48 @@ module decode (
             rdD_reg <= 5'b0;
             rs1D_reg <= 5'b0;
             rs2D_reg <= 5'b0;
+            funct3D_reg <= 3'b0;
         end
         else begin
-            regwriteD_reg <= regwriteD;
-            memrwD_reg <= memrwD; 
-            aselD_reg <= aselD;
-            bselD_reg <= bselD;
-            wbselD_reg <= wbselD;
-            aluselD_reg <= aluselD;
-            pcD_reg <= pcD;
-            pc4D_reg <= pc4D;
-            rd1D_reg <= rd1D;
-            rd2D_reg <= rd2D; 
-            imm_exD_reg <= imm_exD;
-            rdD_reg <= rdD;
-            rs1D_reg <= rs1D;
-            rs2D_reg <= rs2D;
+            if(flushE) begin
+                regwriteD_reg <= 1'b0;
+                memrwD_reg <= 1'b0; 
+                aselD_reg <= 1'b0;
+                bselD_reg <= 1'b0;
+                brunD_reg <= 1'b0;
+                branchD_reg <= 1'b0;
+                jumpD_reg <= 1'b0;
+                wbselD_reg <= 2'b0;
+                aluselD_reg <= 3'b0;
+                pcD_reg <= 32'b0;
+                pc4D_reg <= 32'b0;
+                rd1D_reg <= 32'b0;
+                rd2D_reg <= 32'b0;
+                imm_exD_reg <= 32'b0;
+                rdD_reg <= 5'b0;
+                rs1D_reg <= 5'b0;
+                rs2D_reg <= 5'b0;
+                funct3D_reg <= 3'b0;
+            end else begin
+                regwriteD_reg <= regwriteD;
+                memrwD_reg <= memrwD; 
+                aselD_reg <= aselD;
+                bselD_reg <= bselD;
+                brunD_reg <= brunD;
+                branchD_reg <= branchD;
+                jumpD_reg <= jumpD;
+                wbselD_reg <= wbselD;
+                aluselD_reg <= aluselD;
+                pcD_reg <= pcD;
+                pc4D_reg <= pc4D;
+                rd1D_reg <= rd1D;
+                rd2D_reg <= rd2D; 
+                imm_exD_reg <= imm_exD;
+                rdD_reg <= rdD;
+                rs1D_reg <= rs1D;
+                rs2D_reg <= rs2D;
+                funct3D_reg <= funct3;
+            end
         end
     end
 
@@ -165,6 +194,9 @@ module decode (
     assign memrwE = memrwD_reg;
     assign aselE = aselD_reg;
     assign bselE = bselD_reg;
+    assign brunE = brunD_reg;
+    assign branchE = branchD_reg;
+    assign jumpE = jumpD_reg;
     assign wbselE = wbselD_reg;
     assign aluselE = aluselD_reg;
     assign pcE = pcD_reg;
@@ -175,5 +207,6 @@ module decode (
     assign rdE = rdD_reg;
     assign rs1E = rs1D_reg;
     assign rs2E = rs2D_reg;
+    assign funct3E = funct3D_reg;
 
 endmodule
