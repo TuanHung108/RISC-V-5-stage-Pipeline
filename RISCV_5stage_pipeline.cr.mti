@@ -1,30 +1,23 @@
-C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/top.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/top.v
+C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/tb_top.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/tb_top.v
 QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
--- Compiling module top
+-- Compiling module tb_top
 
 Top level modules:
-	top
+	tb_top
 
-} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/execute.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/execute.v
+} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/imem.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/imem.v
 QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
--- Compiling module execute
+-- Compiling module imem
 
 Top level modules:
-	execute
+	imem
 
-} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/writeback.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/writeback.v
+} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/hazard_unit.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/hazard_unit.v
 QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
--- Compiling module writeback
+-- Compiling module hazard_unit
 
 Top level modules:
-	writeback
-
-} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/decode.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/decode.v
-QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
--- Compiling module decode
-
-Top level modules:
-	decode
+	hazard_unit
 
 } {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/memory.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/memory.v
 QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
@@ -33,11 +26,53 @@ QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
 Top level modules:
 	memory
 
-} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/hazard_unit.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/hazard_unit.v
+} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/fetch.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/fetch.v
 QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
--- Compiling module hazard_unit
+-- Compiling module fetch
 
 Top level modules:
-	hazard_unit
+	fetch
+
+} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/execute.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/execute.v
+QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
+-- Compiling module execute
+
+Top level modules:
+	execute
+
+} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/top.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/top.v
+QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
+-- Compiling module top
+
+Top level modules:
+	top
+
+} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/data_memory.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/data_memory.v
+QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
+-- Compiling module data_memory
+
+Top level modules:
+	data_memory
+
+} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/writeback.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/writeback.v
+QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
+-- Compiling module writeback
+
+Top level modules:
+	writeback
+
+} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/RISCV_Pipeline.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/RISCV_Pipeline.v
+QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
+-- Compiling module riscv
+
+Top level modules:
+	riscv
+
+} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/tb_riscv.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/tb_riscv.v
+QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
+-- Compiling module tb_riscv
+
+Top level modules:
+	tb_riscv
 
 } {} {}}

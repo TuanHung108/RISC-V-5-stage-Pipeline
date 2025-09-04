@@ -10,7 +10,7 @@ module decode (
     output brunE, branchE, jumpE,
     output bselE,
     output [1:0] wbselE,
-    output [2:0] ALUselE,
+    output [3:0] ALUselE,
     output [2:0] funct3E,
     output [4:0] rs1D, rs2D,
     output [4:0] rdE, rs1E, rs2E,
@@ -22,10 +22,11 @@ module decode (
     // Declaration of register
     reg regwriteD_reg, memrwD_reg, bselD_reg, brunD_reg, branchD_reg, jumpD_reg;
     reg [1:0] wbselD_reg;
-    reg [2:0] aluselD_reg, funct3D_reg;
+    reg [2:0] funct3D_reg;
+    reg [3:0] aluselD_reg;
+    reg [4:0] rdD_reg, rs1D_reg, rs2D_reg;
     reg [31:0] pcD_reg, pc4D_reg;
     reg [31:0] rd1D_reg, rd2D_reg, imm_exD_reg;
-    reg [4:0] rdD_reg, rs1D_reg, rs2D_reg;
 
 
     // Control Unit
@@ -33,52 +34,129 @@ module decode (
     wire pcselD, regwriteD, memrwD, brunD, branchD, jumpD;
     wire bselD;
     wire [1:0] wbselD;
-    wire [2:0] immselD, aluselD;
+    wire [2:0] immselD;
+    wire [3:0] aluselD;
     wire [4:0] rdD; // rs1D, rs2D
 
     wire [6:0] opcode = instrD[6:0];
     wire [2:0] funct3 = instrD[14:12];
     wire [6:0] funct7 = instrD[31:25];
 
-    reg [13:0] control_signals;
+    // reg [13:0] control_signals;
+    // assign {immselD, regwriteD, brunD, branchD, jumpD, bselD, aluselD, memrwD, wbselD} = control_signals;
+
+
+    // always @(opcode, funct3, funct7) begin
+    //     control_signals = 14'b000_0_0_0_0_0_000_0_00; // default
+    //     case (opcode)
+    //         7'b0110011: begin // R-type
+    //             case (funct3)
+    //                 3'b000: begin
+    //                     if (funct7 == 7'b0000000)
+    //                         control_signals = 14'b000_1_0_0_0_0_000_0_01; // add
+    //                     else
+    //                         control_signals = 14'b000_1_0_0_0_0_001_0_01; // sub
+    //                 end
+    //                 3'b111: control_signals = 14'b000_1_0_0_0_0_010_0_01; // and
+    //                 3'b110: control_signals = 14'b000_1_0_0_0_0_011_0_01; // or
+    //                 3'b100: control_signals = 14'b000_1_0_0_0_0_100_0_01; // xor
+    //                 default:control_signals = 14'b000_1_0_0_0_0_000_0_01;
+    //             endcase
+    //         end
+
+    //         7'b0010011: control_signals = 14'b001_1_0_0_0_1_000_0_01; // addi
+    //         7'b0000011: control_signals = 14'b001_1_0_0_0_1_000_0_00; // lw
+    //         7'b0100011: control_signals = 14'b010_0_0_0_0_1_000_1_00; // sw
+    //         7'b1100111: control_signals = 14'b001_1_0_0_1_1_000_0_10; // jalr
+
+    //         7'b1100011: begin // branch
+    //             case (funct3)
+    //                 3'b000: control_signals = 14'b011_0_0_1_0_1_000_0_00; // beq
+    //                 3'b001: control_signals = 14'b011_0_0_1_0_1_000_0_00; // bne
+    //                 3'b100: control_signals = 14'b011_0_0_1_0_1_000_0_00; // blt
+    //                 3'b101: control_signals = 14'b011_0_0_1_0_1_000_0_00; // bge
+    //                 3'b110: control_signals = 14'b011_0_1_1_0_1_000_0_00  // bltu
+    //                 3'b111: control_signals = 14'b011_0_1_1_0_1_000_0_00  // bgeu
+    //                 default:control_signals = 14'b000_0_0_0_0_0_000_0_00;
+    //             endcase
+    //         end
+    //         7'b1101111: control_signals = 14'b100_1_0_0_1_1_000_0_10; // jal
+
+    //         7'b0110111: control_signals = 14'b101_1_0_0_0_1_000_0_01 // lui
+    //         7'b0010111: control_signals = 14'b101_1_0_0_0_1_000_0_01 // aupic
+
+    //         default: control_signals = 14'b000_0_0_0_0_0_000_0_00;
+    //     endcase
+    // end
+
+    reg [14:0] control_signals;  
+    // ImmSel[2:0], RegWrite, BrUn, Branch, Jump, BSel, ALUSel[3:0], MemRW, WBSel[1:0]
     assign {immselD, regwriteD, brunD, branchD, jumpD, bselD, aluselD, memrwD, wbselD} = control_signals;
 
-
     always @(opcode, funct3, funct7) begin
-        control_signals = 14'b000_0_0_0_0_0_000_0_00; // default
+        control_signals = 15'b000_0_0_0_0_0_0000_0_00; // default 
         case (opcode)
-            7'b0110011: begin // R-type
+
+            // ---------------- R-type ----------------
+            7'b0110011: begin
                 case (funct3)
                     3'b000: begin
-                        if (funct7 == 7'b0000000)
-                            control_signals = 14'b000_1_0_0_0_0_000_0_01; // add
-                        else
-                            control_signals = 14'b000_1_0_0_0_0_001_0_01; // sub
+                        if (funct7 == 7'b0000000) // add
+                            control_signals = 15'b000_1_0_0_0_0_0000_0_01;
+                        else if (funct7 == 7'b0100000) // sub
+                            control_signals = 15'b000_1_0_0_0_0_0001_0_01;
                     end
-                    3'b111: control_signals = 14'b000_1_0_0_0_0_010_0_01; // and
-                    3'b110: control_signals = 14'b000_1_0_0_0_0_011_0_01; // or
-                    3'b100: control_signals = 14'b000_1_0_0_0_0_100_0_01; // xor
-                    default:control_signals = 14'b000_1_0_0_0_0_000_0_01;
+                    3'b111: control_signals = 15'b000_1_0_0_0_0_0010_0_01; // and
+                    3'b110: control_signals = 15'b000_1_0_0_0_0_0011_0_01; // or
+                    3'b100: control_signals = 15'b000_1_0_0_0_0_0100_0_01; // xor
+                    3'b001: control_signals = 15'b000_1_0_0_0_0_0101_0_01; // sll
+                    3'b101: begin
+                        if (funct7 == 7'b0000000) // srl
+                            control_signals = 15'b000_1_0_0_0_0_0110_0_01;
+                        else if (funct7 == 7'b0100000) // sra
+                            control_signals = 15'b000_1_0_0_0_0_0111_0_01;
+                    end
+                    3'b010: control_signals = 15'b000_1_0_0_0_0_1000_0_01; // slt
+                    3'b011: control_signals = 15'b000_1_0_0_0_0_1001_0_01; // sltu
                 endcase
             end
 
-            7'b0010011: control_signals = 14'b001_1_0_0_0_1_000_0_01; // addi
-            7'b0000011: control_signals = 14'b001_1_0_0_0_1_000_0_00; // lw
-            7'b0100011: control_signals = 14'b010_0_0_0_0_1_000_1_00; // sw
-            7'b1100111: control_signals = 14'b001_1_0_0_1_1_000_0_10; // jalr
-
-            7'b1100011: begin // branch
+            // ---------------- I-type ----------------
+            7'b0010011: begin
                 case (funct3)
-                    3'b000: control_signals = 14'b011_0_0_1_0_1_000_0_00; // beq
-                    3'b001: control_signals = 14'b011_0_0_1_0_1_000_0_00; // bne
-                    3'b100: control_signals = 14'b011_0_0_1_0_1_000_0_00; // blt
-                    3'b101: control_signals = 14'b011_0_0_1_0_1_000_0_00; // bge
-                    default:control_signals = 14'b000_0_0_0_0_0_000_0_00;
+                    3'b000: control_signals = 15'b001_1_0_0_0_1_0000_0_01; // addi
+                    3'b100: control_signals = 15'b001_1_0_0_0_1_0100_0_01; // xori
+                    3'b110: control_signals = 15'b001_1_0_0_0_1_0011_0_01; // ori
+                    3'b111: control_signals = 15'b001_1_0_0_0_1_0010_0_01; // andi
                 endcase
             end
-            7'b1101111: control_signals = 14'b100_1_0_0_1_0_000_0_10; // jal
 
-            default: control_signals = 14'b000_0_0_0_0_0_000_0_00;
+            7'b0000011: control_signals = 15'b001_1_0_0_0_1_0000_0_00; // lw
+            7'b1100111: control_signals = 15'b001_1_0_0_1_1_0000_0_10; // jalr
+
+            // ---------------- S-type ----------------
+            7'b0100011: control_signals = 15'b010_0_0_0_0_1_0000_1_00; // sw
+
+            // ---------------- B-type ----------------
+            7'b1100011: begin
+                case (funct3)
+                    3'b000: control_signals = 15'b011_0_0_1_0_1_0000_0_00; // beq
+                    3'b001: control_signals = 15'b011_0_0_1_0_1_0000_0_00; // bne
+                    3'b100: control_signals = 15'b011_0_0_1_0_1_0000_0_00; // blt
+                    3'b101: control_signals = 15'b011_0_0_1_0_1_0000_0_00; // bge
+                    3'b110: control_signals = 15'b011_0_1_1_0_1_0000_0_00; // bltu
+                    3'b111: control_signals = 15'b011_0_1_1_0_1_0000_0_00; // bgeu
+                endcase
+            end
+
+            // ---------------- J-type ----------------
+            7'b1101111: control_signals = 15'b100_1_0_0_1_1_0000_0_10; // jal
+
+            // ---------------- U-type ----------------
+            7'b0110111: control_signals = 15'b101_1_0_0_0_1_0000_0_01; // lui
+            7'b0010111: control_signals = 15'b101_1_0_0_0_1_0000_0_01; // auipc
+
+            default: control_signals = 15'b000_0_0_0_0_0_0000_0_00;
         endcase
     end
 
@@ -124,6 +202,7 @@ module decode (
     assign rs1D = instrD[19:15];
     assign rs2D = instrD[24:20];
     assign rdD = instrD[11:7];
+    
 
     // Register Logic
     always @(posedge clk or negedge rst_n) begin
@@ -135,7 +214,7 @@ module decode (
             branchD_reg <= 1'b0;
             jumpD_reg <= 1'b0;
             wbselD_reg <= 2'b0;
-            aluselD_reg <= 3'b0;
+            aluselD_reg <= 4'b0;
             pcD_reg <= 32'b0;
             pc4D_reg <= 32'b0;
             rd1D_reg <= 32'b0;
@@ -155,7 +234,7 @@ module decode (
                 branchD_reg <= 1'b0;
                 jumpD_reg <= 1'b0;
                 wbselD_reg <= 2'b0;
-                aluselD_reg <= 3'b0;
+                aluselD_reg <= 4'b0;
                 pcD_reg <= 32'b0;
                 pc4D_reg <= 32'b0;
                 rd1D_reg <= 32'b0;

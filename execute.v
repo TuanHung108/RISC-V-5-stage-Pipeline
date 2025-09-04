@@ -5,7 +5,7 @@ module execute (
     input [2:0] funct3E,
     input bselE,
     input [1:0] wbselE,
-    input [2:0] ALUselE,
+    input [3:0] ALUselE,
     input [1:0] forwardAE, forwardBE,
     input [4:0] rs1E, rs2E, rdE,
     input [31:0] resultW,
@@ -42,22 +42,30 @@ module execute (
     assign src_B = bselE ? imm_exE : src_B_inter;
 
     assign pcTargetE = pcE + imm_exE;
-    localparam ADD = 3'b000,
-                SUB = 3'b001,
-                AND = 3'b010,
-                OR = 3'b011,
-                XOR = 3'b100;
-    
-    
+    localparam  ADD = 4'b0000,
+                SUB = 4'b0001,
+                AND = 4'b0010,
+                OR = 4'b0011,
+                XOR = 4'b0100,
+                SLL = 4'b0101,
+                SRL = 4'b0110,
+                SRA = 4'b0111,
+                SLT = 4'b1000,
+                SLTU = 4'b1001;
+
     always @(ALUselE, src_A, src_B) begin
         ALUresE = 32'b0;
         case (ALUselE)
             ADD: ALUresE = src_A + src_B;
             SUB: ALUresE = src_A - src_B;
             AND: ALUresE = src_A & src_B;
-    
             OR: ALUresE = src_A | src_B;
             XOR: ALUresE = src_A ^ src_B;
+            SLL: ALUresE = src_A << src_B[4:0];
+            SRL: ALUresE = src_A >> src_B[4:0];
+            SRA: ALUresE = $signed(src_A) >>> src_B[4:0];
+            SLT: ALUresE = ($signed(src_A) < $signed(src_B)) ? {{31{1'b0}}, 1'b1} : 32'b0; 
+            SLTU: ALUresE = ($unsigned(src_A) < $unsigned(src_B)) ? {{31{1'b0}}, 1'b1} : 32'b0; 
             default: ALUresE  = 32'b0;
         endcase
     end
