@@ -21,7 +21,8 @@ module execute (
 );
 
     // Declaration of register
-    reg regwriteE_reg, memrwE_reg,
+    reg regwriteE_reg;
+    reg memrwE_reg;
     reg [1:0] wbselE_reg;
     reg [4:0] rdE_reg;
     reg [31:0] rs2E_reg, ALUresE_reg, pc4E_reg;

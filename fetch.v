@@ -6,11 +6,11 @@ module fetch (
     input stallF, stallD,
     input flushD,
 
+    output reg [31:0] pcF,
     output [31:0] instrD,
     output [31:0] pc4D, pcD
 );
     wire [31:0] pc4F, pc_next;
-    reg [31:0] pcF;
 
     assign pc4F = pcF + 32'd4;
     assign pc_next = pcselE ? pcTargetE : pc4F;
@@ -36,7 +36,7 @@ module fetch (
         end
         else begin
             if(flushD && !stallD) begin
-                nstrF_reg <= 32'b0;
+                instrF_reg <= 32'b0;
                 pcF_reg <= 32'b0;
                 pc4F_reg <= 32'b0;
             end else if(!stallD) begin

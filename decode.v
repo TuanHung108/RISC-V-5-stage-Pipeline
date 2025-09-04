@@ -1,10 +1,10 @@
 module decode (
     input clk, rst_n,
-    input regwriteW, breqE, brltE,
+    input regwriteW,
+    input flushE,
     input [4:0] rdW,
     input [31:0] instrD, pcD, pc4D,
     input [31:0] resultW,
-    input flushE,
 
     output regwriteE, memrwE, 
     output brunE, branchE, jumpE,
@@ -28,7 +28,7 @@ module decode (
 
 
     // Control Unit
-    // ImmSel_RegWrite_BrUn_Branch_Jump_Asel_Bsel_ALUSel_MemRW_WBSel
+    // ImmSel_RegWrite_BrUn_Branch_Jump_Bsel_ALUSel_MemRW_WBSel
     wire pcselD, regwriteD, memrwD, brunD, branchD, jumpD;
     wire bselD;
     wire [1:0] wbselD;
@@ -130,7 +130,6 @@ module decode (
         if (!rst_n) begin
             regwriteD_reg <= 1'b0;
             memrwD_reg <= 1'b0; 
-            aselD_reg <= 1'b0;
             bselD_reg <= 1'b0;
             brunD_reg <= 1'b0;
             branchD_reg <= 1'b0;
@@ -151,7 +150,6 @@ module decode (
             if(flushE) begin
                 regwriteD_reg <= 1'b0;
                 memrwD_reg <= 1'b0; 
-                aselD_reg <= 1'b0;
                 bselD_reg <= 1'b0;
                 brunD_reg <= 1'b0;
                 branchD_reg <= 1'b0;
@@ -170,7 +168,6 @@ module decode (
             end else begin
                 regwriteD_reg <= regwriteD;
                 memrwD_reg <= memrwD; 
-                aselD_reg <= aselD;
                 bselD_reg <= bselD;
                 brunD_reg <= brunD;
                 branchD_reg <= branchD;
@@ -192,7 +189,6 @@ module decode (
 
     assign regwriteE = regwriteD_reg;
     assign memrwE = memrwD_reg;
-    assign aselE = aselD_reg;
     assign bselE = bselD_reg;
     assign brunE = brunD_reg;
     assign branchE = branchD_reg;

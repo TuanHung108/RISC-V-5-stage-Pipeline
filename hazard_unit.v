@@ -4,7 +4,7 @@ module hazard_unit(
     input  [4:0] rdM, rdW, rdE,
     input        regwriteM, regwriteW,
     input  [1:0] wbselE,      
-    input        pcsrcE,
+    input        pcselE,
     output       flushE,
     output       flushD,
     output       stallF, stallD,
@@ -37,8 +37,8 @@ module hazard_unit(
     assign stallF = lwstall;
 
     // Control hazard
-    assign flushD = pcsrcE;
-    assign flushE = lwstall | pcsrcE;
+    assign flushD = pcselE;
+    assign flushE = lwstall | pcselE;
     
 endmodule
 
