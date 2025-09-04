@@ -1,18 +1,19 @@
 module top(
     input clk, rst_n,
     input [31:0] instrF,
-    input wire        dmem_we,
-    input wire [31:0] dmem_addr,
-    input wire [31:0] dmem_wdata,
+    output dmem_we,
+    output [31:0] dmem_addr,
+    output [31:0] dmem_wdata,
 
-    output [31:0] data_readM,
+    input [31:0] data_readM,
     output [31:0] pcF
 );
+
     // Wires between stages
-    wire [31:0] pcD, pc4D, instrD;
+    wire [31:0] pcD, pc4D, instrD, data_readW;
     wire [31:0] pcE, pc4E, imm_exE;
-    wire [31:0] pcM, pc4M;
-    wire [31:0] pcW, pc4W;
+    wire [31:0] pc4M;
+    wire [31:0] pc4W;
     wire [31:0] pcTargetE;
 
     // Wires for control signals
@@ -20,18 +21,18 @@ module top(
     wire memrwE, memrwM;
     wire pcselE, brunE, branchE, jumpE, bselE;
     wire [1:0] wbselE, wbselM, wbselW;
-    wire [3:0] ALUselE;
+    wire [2:0] ALUselE;
     wire [2:0] funct3E;
 
 
     // Wires for data signals
-    wire [4:0] rdD, rdE, rdM, rdW;
+    wire [4:0] rdE, rdM, rdW;
     wire [4:0] rs1D, rs2D, rs1E, rs2E;
     wire [31:0] rd1E, rd2E;
     wire [31:0] resultW;
-    wire [31:0] ALUresE, ALUresM, ALUresW;
+    wire [31:0] ALUresM, ALUresW;
     wire [31:0] writedataM;
-
+    
     // Wires for hazard unit
     wire flushE, flushD;
     wire stallF, stallD;
