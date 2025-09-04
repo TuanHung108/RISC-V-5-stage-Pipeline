@@ -1,7 +1,7 @@
 module fetch (
     input clk, rst_n,
     input pcselE,
-    input [31:0] ALUresE,
+    input [31:0] pcTargetE,
     input [31:0] instrF,
     input stallF, stallD,
     input flushD,
@@ -13,7 +13,7 @@ module fetch (
     reg [31:0] pcF;
 
     assign pc4F = pcF + 32'd4;
-    assign pc_next = pcselE ? ALUresE : pc4F;
+    assign pc_next = pcselE ? pcTargetE : pc4F;
 
 
     always @(posedge clk or negedge rst_n) begin
