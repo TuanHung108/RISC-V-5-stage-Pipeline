@@ -12,6 +12,7 @@ module decode (
     output [1:0] wbselE,
     output [2:0] ALUselE,
     output [2:0] funct3E,
+    output [4:0] rs1D, rs2D,
     output [4:0] rdE, rs1E, rs2E,
     output [31:0] rd1E, rd2E,
     output [31:0] imm_exE,
@@ -33,7 +34,7 @@ module decode (
     wire bselD;
     wire [1:0] wbselD;
     wire [2:0] immselD, aluselD;
-    wire [4:0] rs1D, rs2D, rdD;
+    wire [4:0] rdD; // rs1D, rs2D
 
     wire [6:0] opcode = instrD[6:0];
     wire [2:0] funct3 = instrD[14:12];
@@ -75,7 +76,6 @@ module decode (
                     default:control_signals = 14'b000_0_0_0_0_0_000_0_00;
                 endcase
             end
-
             7'b1101111: control_signals = 14'b100_1_0_0_1_0_000_0_10; // jal
 
             default: control_signals = 14'b000_0_0_0_0_0_000_0_00;
