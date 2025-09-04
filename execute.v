@@ -1,9 +1,8 @@
 module execute (
     input clk, rst_n,
-    input regwriteE, memrwE, 
+    input regwriteE, memrwE, bselE,
     input brunE, branchE, jumpE,
     input [2:0] funct3E,
-    input bselE,
     input [1:0] wbselE,
     input [3:0] ALUselE,
     input [1:0] forwardAE, forwardBE,
@@ -13,7 +12,7 @@ module execute (
     input [31:0] imm_exE, pcE, pc4E,
 
     output regwriteM, memrwM, 
-    output pcselE,
+    output pcselE, 
     output [1:0] wbselM,
     output [31:0] pc4M, pcTargetE,
     output [4:0] rdM,
@@ -25,7 +24,7 @@ module execute (
     reg memrwE_reg;
     reg [1:0] wbselE_reg;
     reg [4:0] rdE_reg;
-    reg [31:0] rs2E_reg, ALUresE_reg, pc4E_reg;
+    reg [31:0] rd2E_reg, ALUresE_reg, pc4E_reg;
 
     // ALU logic
     wire [31:0] src_B_inter;
@@ -34,14 +33,14 @@ module execute (
 
     assign src_A = (forwardAE == 2'b00) ? rd1E : 
                         (forwardAE == 2'b01) ? resultW :
-                        (forwardAE == 2'b10) ? ALUresM : 32'b0;
+                        (forwardAE == 2'b10) ? ALUresM : 32'd0;
     assign src_B_inter = (forwardBE == 2'b00) ? rd2E : 
                         (forwardBE == 2'b01) ? resultW :
-                        (forwardBE == 2'b10) ? ALUresM : 32'b0; 
+                        (forwardBE == 2'b10) ? ALUresM : 32'd0; 
 
     assign src_B = bselE ? imm_exE : src_B_inter;
-
     assign pcTargetE = pcE + imm_exE;
+
     localparam  ADD = 4'b0000,
                 SUB = 4'b0001,
                 AND = 4'b0010,
@@ -64,8 +63,8 @@ module execute (
             SLL: ALUresE = src_A << src_B[4:0];
             SRL: ALUresE = src_A >> src_B[4:0];
             SRA: ALUresE = $signed(src_A) >>> src_B[4:0];
-            SLT: ALUresE = ($signed(src_A) < $signed(src_B)) ? {{31{1'b0}}, 1'b1} : 32'b0; 
-            SLTU: ALUresE = ($unsigned(src_A) < $unsigned(src_B)) ? {{31{1'b0}}, 1'b1} : 32'b0; 
+            SLT: ALUresE = ($signed(src_A) < $signed(src_B)) ? {{31{1'b0}}, 1'b1} : 32'd0; 
+            SLTU: ALUresE = ($unsigned(src_A) < $unsigned(src_B)) ? {{31{1'b0}}, 1'b1} : 32'd0; 
             default: ALUresE  = 32'b0;
         endcase
     end
@@ -100,18 +99,18 @@ module execute (
         if (!rst_n) begin
             regwriteE_reg <= 1'b0;
             memrwE_reg <= 1'b0;
-            wbselE_reg <= 2'b0;
-            ALUresE_reg <= 32'b0;
-            rs2E_reg <= 32'b0;
-            rdE_reg <= 5'b0;
-            pc4E_reg <= 32'b0;
+            wbselE_reg <= 2'd0;
+            ALUresE_reg <= 32'd0;
+            rd2E_reg <= 32'd0;
+            rdE_reg <= 5'd0;
+            pc4E_reg <= 32'd0;
         end
         else begin
             regwriteE_reg <= regwriteE;
             memrwE_reg <= memrwE;
             wbselE_reg <= wbselE;
             ALUresE_reg <= ALUresE;
-            rs2E_reg <= rs2E;
+            rd2E_reg <= rd2E;
             rdE_reg <= rdE;
             pc4E_reg <= pc4E;
         end
@@ -122,9 +121,7 @@ module execute (
     assign wbselM = wbselE_reg;
     assign ALUresM = ALUresE_reg;
     assign rdM = rdE_reg;
-    assign data_writeM = rs2E_reg;
+    assign data_writeM = rd2E_reg;
     assign pc4M = pc4E_reg;
 
 endmodule
-
-

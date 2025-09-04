@@ -64,3 +64,4 @@ module memory (
     assign pc4W       = pc4M_r;
 
 endmodule
+

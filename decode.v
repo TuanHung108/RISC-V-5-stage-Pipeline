@@ -27,7 +27,7 @@ module decode (
     reg [4:0] rdD_reg, rs1D_reg, rs2D_reg;
     reg [31:0] pcD_reg, pc4D_reg;
     reg [31:0] rd1D_reg, rd2D_reg, imm_exD_reg;
-
+    reg [14:0] control_signals;  
 
     // Control Unit
     // ImmSel_RegWrite_BrUn_Branch_Jump_Bsel_ALUSel_MemRW_WBSel
@@ -36,11 +36,15 @@ module decode (
     wire [1:0] wbselD;
     wire [2:0] immselD;
     wire [3:0] aluselD;
-    wire [4:0] rdD; // rs1D, rs2D
+    wire [4:0] rdD;
 
     wire [6:0] opcode = instrD[6:0];
     wire [2:0] funct3 = instrD[14:12];
     wire [6:0] funct7 = instrD[31:25];
+
+    assign rs1D = instrD[19:15];
+    assign rs2D = instrD[24:20];
+    assign rdD = instrD[11:7];
 
     // reg [13:0] control_signals;
     // assign {immselD, regwriteD, brunD, branchD, jumpD, bselD, aluselD, memrwD, wbselD} = control_signals;
@@ -89,7 +93,6 @@ module decode (
     //     endcase
     // end
 
-    reg [14:0] control_signals;  
     // ImmSel[2:0], RegWrite, BrUn, Branch, Jump, BSel, ALUSel[3:0], MemRW, WBSel[1:0]
     assign {immselD, regwriteD, brunD, branchD, jumpD, bselD, aluselD, memrwD, wbselD} = control_signals;
 
@@ -118,6 +121,7 @@ module decode (
                     end
                     3'b010: control_signals = 15'b000_1_0_0_0_0_1000_0_01; // slt
                     3'b011: control_signals = 15'b000_1_0_0_0_0_1001_0_01; // sltu
+                    default: control_signals = 15'b000_1_0_0_0_0_0000_0_01;
                 endcase
             end
 
@@ -128,6 +132,8 @@ module decode (
                     3'b100: control_signals = 15'b001_1_0_0_0_1_0100_0_01; // xori
                     3'b110: control_signals = 15'b001_1_0_0_0_1_0011_0_01; // ori
                     3'b111: control_signals = 15'b001_1_0_0_0_1_0010_0_01; // andi
+                    default: control_signals = 15'b001_1_0_0_0_1_0000_0_01;
+
                 endcase
             end
 
@@ -146,6 +152,7 @@ module decode (
                     3'b101: control_signals = 15'b011_0_0_1_0_1_0000_0_00; // bge
                     3'b110: control_signals = 15'b011_0_1_1_0_1_0000_0_00; // bltu
                     3'b111: control_signals = 15'b011_0_1_1_0_1_0000_0_00; // bgeu
+                    default: control_signals = 15'b000_0_0_0_0_0_0000_0_00;
                 endcase
             end
 
@@ -160,10 +167,9 @@ module decode (
         endcase
     end
 
-    // Register File
-    reg [31:0] reg_file [0:31];
+
+    // Imm extend
     reg [31:0] imm_exD;
-    wire [31:0] rd1D, rd2D;
 
     localparam  I_type = 3'b001,
                 S_type = 3'b010,
@@ -171,7 +177,6 @@ module decode (
                 J_type = 3'b100,
                 U_type = 3'b101;
 
-    // Imm for each instruction type
     always @(immselD, instrD) begin
         imm_exD = 32'b0;
         case (immselD)
@@ -184,25 +189,24 @@ module decode (
         endcase
     end
 
-    integer i;
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            for (i = 0; i < 32; i = i + 1)
-                reg_file[i] <= 32'b0;
-        end else begin
-            if (regwriteW && (rdW != 5'd0)) begin
-                reg_file[rdW] <= resultW;
-            end
+
+    // Register File
+    reg [31:0] reg_file [0:31];
+    wire [31:0] rd1D, rd2D;
+
+    always @(posedge clk) begin
+        if (regwriteW && (rdW != 5'd0)) begin
+            reg_file[rdW] <= resultW;
         end
     end
 
-    assign rd1D = reg_file[instrD[19:15]];
-    assign rd2D = reg_file[instrD[24:20]];
+    assign rd1D = (!rst_n) ? 32'd0 : reg_file[instrD[19:15]];
+    assign rd2D = (!rst_n) ? 32'd0 : reg_file[instrD[24:20]];
 
-    assign rs1D = instrD[19:15];
-    assign rs2D = instrD[24:20];
-    assign rdD = instrD[11:7];
-    
+    initial begin
+        reg_file[0] = 32'h00000000;
+    end
+
 
     // Register Logic
     always @(posedge clk or negedge rst_n) begin
@@ -213,17 +217,17 @@ module decode (
             brunD_reg <= 1'b0;
             branchD_reg <= 1'b0;
             jumpD_reg <= 1'b0;
-            wbselD_reg <= 2'b0;
-            aluselD_reg <= 4'b0;
-            pcD_reg <= 32'b0;
-            pc4D_reg <= 32'b0;
-            rd1D_reg <= 32'b0;
-            rd2D_reg <= 32'b0;
-            imm_exD_reg <= 32'b0;
-            rdD_reg <= 5'b0;
-            rs1D_reg <= 5'b0;
-            rs2D_reg <= 5'b0;
-            funct3D_reg <= 3'b0;
+            wbselD_reg <= 2'd0;
+            aluselD_reg <= 4'd0;
+            pcD_reg <= 32'd0;
+            pc4D_reg <= 32'd0;
+            rd1D_reg <= 32'd0;
+            rd2D_reg <= 32'd0;
+            imm_exD_reg <= 32'd0;
+            rdD_reg <= 5'd0;
+            rs1D_reg <= 5'd0;
+            rs2D_reg <= 5'd0;
+            funct3D_reg <= 3'd0;
         end
         else begin
             if(flushE) begin
@@ -233,17 +237,17 @@ module decode (
                 brunD_reg <= 1'b0;
                 branchD_reg <= 1'b0;
                 jumpD_reg <= 1'b0;
-                wbselD_reg <= 2'b0;
-                aluselD_reg <= 4'b0;
-                pcD_reg <= 32'b0;
-                pc4D_reg <= 32'b0;
-                rd1D_reg <= 32'b0;
-                rd2D_reg <= 32'b0;
-                imm_exD_reg <= 32'b0;
-                rdD_reg <= 5'b0;
-                rs1D_reg <= 5'b0;
-                rs2D_reg <= 5'b0;
-                funct3D_reg <= 3'b0;
+                wbselD_reg <= 2'd0;
+                aluselD_reg <= 4'd0;
+                pcD_reg <= 32'd0;
+                pc4D_reg <= 32'd0;
+                rd1D_reg <= 32'd0;
+                rd2D_reg <= 32'd0;
+                imm_exD_reg <= 32'd0;
+                rdD_reg <= 5'd0;
+                rs1D_reg <= 5'd0;
+                rs2D_reg <= 5'd0;
+                funct3D_reg <= 3'd0;
             end else begin
                 regwriteD_reg <= regwriteD;
                 memrwD_reg <= memrwD; 
@@ -270,7 +274,7 @@ module decode (
     assign memrwE = memrwD_reg;
     assign bselE = bselD_reg;
     assign brunE = brunD_reg;
-    assign branchE = branchD_reg;
+    assign branchE = branchD_reg;   
     assign jumpE = jumpD_reg;
     assign wbselE = wbselD_reg;
     assign ALUselE = aluselD_reg;

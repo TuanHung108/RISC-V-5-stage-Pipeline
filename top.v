@@ -21,7 +21,7 @@ module top(
     wire memrwE, memrwM;
     wire pcselE, brunE, branchE, jumpE, bselE;
     wire [1:0] wbselE, wbselM, wbselW;
-    wire [2:0] ALUselE;
+    wire [3:0] ALUselE;
     wire [2:0] funct3E;
 
 
@@ -76,13 +76,13 @@ module top(
         .ALUselE(ALUselE),
         .funct3E(funct3E),
         .imm_exE(imm_exE),
+        .rs1D(rs1D),
+        .rs2D(rs2D),
         .rs1E(rs1E),
         .rs2E(rs2E),
         .rdE(rdE),
         .rd1E(rd1E),
         .rd2E(rd2E),
-        .rs1D(rs1D),
-        .rs2D(rs2D),
         .pcE(pcE),
         .pc4E(pc4E)
     );
@@ -149,7 +149,7 @@ module top(
 
     assign resultW = (wbselW == 2'b00) ? data_readW :
                     (wbselW == 2'b01) ? ALUresW :
-                    (wbselW == 2'b10) ? pc4W : 32'b0;
+                    (wbselW == 2'b10) ? pc4W : 32'd0;
     
     hazard_unit u_hazard_unit (
         .rs1E(rs1E),
