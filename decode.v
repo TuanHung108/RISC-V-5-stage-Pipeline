@@ -273,7 +273,7 @@ module decode (
     assign branchE = branchD_reg;
     assign jumpE = jumpD_reg;
     assign wbselE = wbselD_reg;
-    assign aluselE = aluselD_reg;
+    assign ALUselE = aluselD_reg;
     assign pcE = pcD_reg;
     assign pc4E = pc4D_reg;
     assign rd1E = rd1D_reg;
