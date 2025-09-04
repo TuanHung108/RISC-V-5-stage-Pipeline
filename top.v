@@ -26,7 +26,7 @@ module top(
 
     // Wires for data signals
     wire [4:0] rdD, rdE, rdM, rdW;
-    wire [4:0] rs1E, rs2E;
+    wire [4:0] rs1D, rs2D, rs1E, rs2E;
     wire [31:0] rd1E, rd2E;
     wire [31:0] resultW;
     wire [31:0] ALUresE, ALUresM, ALUresW;
@@ -80,6 +80,8 @@ module top(
         .rdE(rdE),
         .rd1E(rd1E),
         .rd2E(rd2E),
+        .rs1D(rs1D),
+        .rs2D(rs2D),
         .pcE(pcE),
         .pc4E(pc4E)
     );
@@ -149,13 +151,6 @@ module top(
                     (wbselW == 2'b10) ? pc4W : 32'b0;
     
     hazard_unit u_hazard_unit (
-        // .rs1E(rs1D),
-        // .rs2E(rs2D),
-        // .rs1D(rs1D),
-        // .rs2D(rs2D),
-        // .rdM(rdM),
-        // .rdW(rdW),
-        // .rdE(rdD),
         .rs1E(rs1E),
         .rs2E(rs2E),
         .rs1D(rs1D),
