@@ -20,7 +20,7 @@ module top(
     wire memrwE, memrwM;
     wire pcselE, brunE, branchE, jumpE, bselE;
     wire [1:0] wbselE, wbselM, wbselW;
-    wire [2:0] ALUselE;
+    wire [3:0] ALUselE;
     wire [2:0] funct3E;
 
 

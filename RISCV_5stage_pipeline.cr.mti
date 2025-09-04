@@ -40,12 +40,12 @@ QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
 Top level modules:
 	execute
 
-} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/top.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/top.v
+} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/decode.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/decode.v
 QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
--- Compiling module top
+-- Compiling module decode
 
 Top level modules:
-	top
+	decode
 
 } {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/data_memory.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/data_memory.v
 QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
