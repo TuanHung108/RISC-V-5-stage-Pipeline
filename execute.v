@@ -12,16 +12,17 @@ module execute (
     input [31:0] rd1E, rd2E,
     input [31:0] imm_exE, pcE, pc4E,
 
-//    output regwriteM, memrwM, 
+    output regwriteM, memrwM, 
     output pcselE,
     output [1:0] wbselM,
-    output [31:0] pc4M,
+    output [31:0] pc4M, pcTargetE,
     output [4:0] rdM,
     output [31:0] ALUresM, data_writeM
 );
 
     // Declaration of register
-    reg regwriteE_reg, memrwE_reg, wbselE_reg;
+    reg regwriteE_reg, memrwE_reg,
+    reg [1:0] wbselE_reg;
     reg [4:0] rdE_reg;
     reg [31:0] rs2E_reg, ALUresE_reg, pc4E_reg;
 
@@ -39,12 +40,14 @@ module execute (
 
     assign src_B = bselE ? imm_exE : src_B_inter;
 
+    assign pcTargetE = pcE + imm_exE;
     localparam ADD = 3'b000,
                 SUB = 3'b001,
                 AND = 3'b010,
                 OR = 3'b011,
                 XOR = 3'b100;
-
+    
+    
     always @(ALUselE, src_A, src_B) begin
         ALUresE = 32'b0;
         case (ALUselE)
@@ -77,6 +80,7 @@ module execute (
             3'b001: conditionE = !breqE;
             3'b100: conditionE = brltE;
             3'b101: conditionE = !brltE;
+            default: conditionE = 1'b0;
         endcase
     end
 
