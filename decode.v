@@ -148,8 +148,14 @@ module decode (
     reg [31:0] reg_file [0:31];
     wire [31:0] rd1D, rd2D;
 
-    always @(posedge clk) begin
-        if (regwriteW && (rdW != 5'd0)) begin
+
+    integer i;
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            for (i = 0; i < 32; i = i + 1)
+                reg_file[i] <= 32'd0;
+        end
+        else if (regwriteW && (rdW != 5'd0)) begin
             reg_file[rdW] <= resultW;
         end
         reg_file[0] <= 32'h00000000;

@@ -1,4 +1,11 @@
-C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/tb.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/tb.v
+C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/tb_pipeline_automated.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/tb_pipeline_automated.v
+QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
+-- Compiling module tb_pipeline_automated
+
+Top level modules:
+	tb_pipeline_automated
+
+} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/tb.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/tb.v
 QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
 -- Compiling module riscv_tb
 
@@ -11,13 +18,6 @@ QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
 
 Top level modules:
 	imem
-
-} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/tb_top.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/tb_top.v
-QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
--- Compiling module tb_top
-
-Top level modules:
-	tb_top
 
 } {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/hazard_unit.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/hazard_unit.v
 QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
@@ -40,12 +40,12 @@ QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
 Top level modules:
 	fetch
 
-} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/decode.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/decode.v
+} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/execute.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/execute.v
 QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
--- Compiling module decode
+-- Compiling module execute
 
 Top level modules:
-	decode
+	execute
 
 } {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/core.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/core.v
 QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
@@ -67,19 +67,5 @@ QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
 
 Top level modules:
 	riscv
-
-} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/writeback.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/writeback.v
-QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
--- Compiling module writeback
-
-Top level modules:
-	writeback
-
-} {} {}} C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/tb_riscv.v {1 {vlog -work work -vopt -stats=none C:/QuestaSim_Project/RISC-V-5-stage-Pipeline/tb_riscv.v
-QuestaSim-64 vlog 10.7c Compiler 2018.08 Aug 18 2018
--- Compiling module tb_riscv
-
-Top level modules:
-	tb_riscv
 
 } {} {}}

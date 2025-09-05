@@ -3,11 +3,19 @@
 module riscv_tb;
     reg clk;
     reg rst_n;
+    wire [31:0] instrF, pcF;
 
     // DUT
     riscv dut (
         .clk   (clk),
-        .rst_n (rst_n)
+        .rst_n (rst_n),
+        .instrF(instrF),
+        .pcF   (pcF)
+    );
+
+    imem imem_inst (
+        .pc     (pcF),
+        .ins    (instrF)
     );
 
     // clock 10ns period
