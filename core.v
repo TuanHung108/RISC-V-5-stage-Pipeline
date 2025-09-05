@@ -1,11 +1,11 @@
-module top(
+module core (
     input clk, rst_n,
     input [31:0] instrF,
+    input [31:0] data_readM,
+
     output dmem_we,
     output [31:0] dmem_addr,
     output [31:0] dmem_wdata,
-
-    input [31:0] data_readM,
     output [31:0] pcF
 );
 

@@ -4,10 +4,22 @@ module riscv_tb;
     reg clk;
     reg rst_n;
 
-    // DUT
+    // wire kết nối giữa CPU và IMEM
+    wire [31:0] pcF;
+    wire [31:0] instrF;
+
+    // DUT (CPU core)
     riscv dut (
         .clk   (clk),
-        .rst_n (rst_n)
+        .rst_n (rst_n),
+        .instrF(instrF),
+        .pcF   (pcF)
+    );
+
+    // Instruction memory instance
+    imem imem_inst (
+        .pc (pcF),
+        .ins(instrF)
     );
 
     // clock 10ns period
@@ -16,13 +28,11 @@ module riscv_tb;
 
     // reset + stimulus
     initial begin
-        #10
         rst_n = 0;
-        #10;
-        rst_n = 1;
+        #20 rst_n = 1;
 
         // chạy mô phỏng 500ns
-        #400;
+        #500;
         $finish;
     end
 
@@ -30,8 +40,8 @@ module riscv_tb;
     initial begin
         $monitor("t=%0t pcF=%h instrF=%h ALUresM=%h memrwM=%b dataW=%h dataR=%h",
                   $time,
-                  dut.pcF,
-                  dut.instrF,
+                  pcF,
+                  instrF,
                   dut.ALUresM,
                   dut.memrwM,
                   dut.data_writeM,

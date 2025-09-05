@@ -10,11 +10,9 @@ module data_memory (
 
     always @(posedge clk) begin
         if (memrw) ram [addr] <= data_write; // ghi
+        ram[0] <= 32'd0;
     end
     
-    assign data_read = (!rst_n) ? 32'd0 : ram[addr];
+    assign data_read = ram[addr];
 
-    initial begin
-        ram[0] = 32'h00000000;
-    end
 endmodule
