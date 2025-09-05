@@ -31,7 +31,7 @@ module decode (
 
     // Control Unit
     // ImmSel_RegWrite_BrUn_Branch_Jump_Bsel_ALUSel_MemRW_WBSel
-    wire pcselD, regwriteD, memrwD, brunD, branchD, jumpD;
+    wire regwriteD, memrwD, brunD, branchD, jumpD;
     wire bselD;
     wire [1:0] wbselD;
     wire [2:0] immselD;
@@ -198,14 +198,15 @@ module decode (
         if (regwriteW && (rdW != 5'd0)) begin
             reg_file[rdW] <= resultW;
         end
+        reg_file[0] <= 32'h00000000;
     end
 
-    assign rd1D = (!rst_n) ? 32'd0 : reg_file[instrD[19:15]];
-    assign rd2D = (!rst_n) ? 32'd0 : reg_file[instrD[24:20]];
+    // assign rd1D = (!rst_n) ? 32'd0 : reg_file[instrD[19:15]];
+    // assign rd2D = (!rst_n) ? 32'd0 : reg_file[instrD[24:20]];
 
-    initial begin
-        reg_file[0] = 32'h00000000;
-    end
+    wire write_wb_valid = regwriteW && (rdW != 5'd0);
+    assign rd1D = (write_wb_valid && (rdW == rs1D)) ? resultW : reg_file[rs1D];
+    assign rd2D = (write_wb_valid && (rdW == rs2D)) ? resultW : reg_file[rs2D];
 
 
     // Register Logic
