@@ -1,14 +1,17 @@
 module riscv (
     input clk,
-    input rst_n,
-
-    // // Instruction Memory
-    input [31:0] instrF,
-    output [31:0] pcF
+    input rst_n
 );
 
+    wire [31:0] instrF;
     wire memrwM;
-    wire [31:0] ALUresM, data_writeM, data_readM;
+    wire [31:0] ALUresM, data_writeM, data_readM, pcF;
+
+    // IMEM
+    imem #(.COL(32), .ROW(256)) imem_inst (
+        .pc (pcF),
+        .ins(instrF)
+    );
 
     data_memory data_memory_inst (
         .clk        (clk),
@@ -18,7 +21,7 @@ module riscv (
         .data_read  (data_readM)
     );
 
-    core core_inst (
+    top top_inst (
         .clk(clk),
         .rst_n(rst_n),
         .instrF(instrF),
