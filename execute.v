@@ -1,7 +1,7 @@
 module execute (
     input clk, rst_n,
     input regwriteE, memrwE, bselE,
-    input brunE, branchE, jumpE,
+    input brunE, branchE, jumpE, jalrE,
     input [2:0] funct3E,
     input [1:0] wbselE,
     input [3:0] ALUselE,
@@ -31,13 +31,6 @@ module execute (
     wire [31:0] src_A, src_B;
     reg [31:0] ALUresE;
 
-    // assign src_A = (forwardAE == 2'b00) ? rd1E : 
-    //                     (forwardAE == 2'b01) ? resultW :
-    //                     (forwardAE == 2'b10) ? ALUresM : 32'd0;
-    // assign src_B_inter = (forwardBE == 2'b00) ? rd2E : 
-    //                     (forwardBE == 2'b01) ? resultW :
-    //                     (forwardBE == 2'b10) ? ALUresM : 32'd0; 
-
     localparam  FWD_NONE = 2'b00,
                 FWD_W    = 2'b01,
                 FWD_M    = 2'b10;
@@ -52,7 +45,10 @@ module execute (
 
 
     assign src_B = (bselE) ? imm_exE : src_B_inter;
-    assign pcTargetE = pcE + imm_exE;
+
+    wire [31:0] jalr_sum = src_A + imm_exE;
+    assign pcTargetE = jalrE ? { jalr_sum[31:1], 1'b0 }   // JALR: mask LSB
+                        : (pcE + imm_exE);              // JAL 
 
     localparam  ADD = 4'b0000,
                 SUB = 4'b0001,

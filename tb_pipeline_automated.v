@@ -50,6 +50,16 @@ module tb_pipeline_automated;
 		end
 	endtask
 
+	// Reset data memory (nếu có data memory trong pipeline)
+	task reset_data_memory;
+    integer i;
+    begin
+        for (i = 0; i < 256; i = i + 1) begin
+            DUT.data_memory_inst.ram[i] = 32'b0;
+        end
+    end
+endtask
+
 	// Dump register file hiện tại của DUT ra file hex (tiện đối chiếu golden)
 	task dump_register_file_hex;
 		input [8*256-1:0] out_path;
@@ -69,44 +79,176 @@ module tb_pipeline_automated;
 		end
 	endtask
 
-	// Chạy test R-type
-	task test_R_type;
+	// Task tổng quát để test bất kỳ kiểu lệnh nào
+	task test_instruction_type;
+		input [8*256-1:0] test_name;
+		input [8*256-1:0] imem_path;
+		input [8*256-1:0] golden_path;
+		input [8*256-1:0] observed_path;
+		input integer cycles;
 		integer error_count;
 		integer i;
 		begin
 			error_count = 0;
 
-			$display("%t Starting R-type test...", $time);
+			$display("%t Starting %s test...", $time, test_name);
 
 			// Reset hệ thống
 			rst_n = 0;
 			reset_imem();
+			reset_register_file();
+			reset_data_memory();
 			#(CLOCK_CYCLE);
 			@(negedge clk) rst_n = 1;
 
-			// Nạp chương trình R-type vào instruction_memory
-			$readmemh("./sim_pipeline/R-type/IMEM_hex.txt", instruction_memory);
+			// Nạp chương trình vào instruction_memory
+			$readmemh(imem_path, instruction_memory);
 
 			// Chạy một số chu kỳ đủ lớn để chương trình thực thi
-			repeat (300) @(posedge clk);
+			repeat (cycles) @(posedge clk);
 
 			// Nạp golden và so sánh
-			$readmemh("./sim_pipeline/R-type/golden_reg_file_hex.txt", golden_register_file);
+			$readmemh(golden_path, golden_register_file);
 			for (i = 0; i < 32; i = i + 1) begin
-				if (DUT.core_inst.u_decode.reg_file[i] !== golden_register_file[i]) begin
+				// Kiểm tra nếu có bit X trong giá trị
+				if (^DUT.core_inst.u_decode.reg_file[i] === 1'bx || ^golden_register_file[i] === 1'bx) begin
+					$display("Register x%0d contains X! DUT = %h, Golden = %h", i, DUT.core_inst.u_decode.reg_file[i], golden_register_file[i]);
+					error_count = error_count + 1;
+				end else if (DUT.core_inst.u_decode.reg_file[i] != golden_register_file[i]) begin
 					$display("Register mismatch at x%0d: DUT = %h, Golden = %h", i, DUT.core_inst.u_decode.reg_file[i], golden_register_file[i]);
 					error_count = error_count + 1;
 				end
 			end
 
 			if(error_count == 0) begin
-				$display("%t R-type test passed!", $time);
+				$display("%t %s test passed!", $time, test_name);
 			end else begin
-				$display("%t R-type test failed with %0d errors.", $time, error_count);
+				$display("%t %s test failed with %0d errors.", $time, test_name, error_count);
 				total_error = total_error + error_count;
 			end
+
+			// Ghi lại kết quả thanh ghi quan sát được
+			dump_register_file_hex(observed_path);
 		end
 	endtask
+
+	// Chạy test R-type
+	task test_R_type;
+		begin
+			test_instruction_type(
+				"R-type",
+				"./sim_pipeline/R-type/imem_hex.txt",
+				"./sim_pipeline/R-type/golden_reg_file_hex.txt",
+				"./sim_pipeline/R-type/observed_reg_file_hex.txt",
+				300
+			);
+		end
+	endtask
+
+	// Chạy test B-type
+	task test_B_type;
+		begin
+			test_instruction_type(
+				"B-type",
+				"./sim_pipeline/B-type/imem_hex.txt",
+				"./sim_pipeline/B-type/golden_reg_file_hex.txt",
+				"./sim_pipeline/B-type/observed_reg_file_hex.txt",
+				300
+			);
+		end
+	endtask
+
+	// Chạy test U-type
+	task test_U_type;
+		begin
+			test_instruction_type(
+				"U-type",
+				"./sim_pipeline/U-type/imem_hex.txt",
+				"./sim_pipeline/U-type/golden_reg_file_hex.txt",
+				"./sim_pipeline/U-type/observed_reg_file_hex.txt",
+				300
+			);
+		end
+	endtask
+
+	// Chạy test I-type (arithmetic_logic)
+	task test_I_type_arithmetic_logic;
+		begin
+			test_instruction_type(
+				"I-type (arithmetic_logic)",
+				"./sim_pipeline/I-type(arithmetic_logic)/imem_hex.txt",
+				"./sim_pipeline/I-type(arithmetic_logic)/golden_reg_file.txt",
+				"./sim_pipeline/I-type(arithmetic_logic)/observed_reg_file_hex.txt",
+				300
+			);
+		end
+	endtask
+
+	// Chạy test I-type (JALR)
+	task test_I_type_JALR;
+		begin
+			test_instruction_type(
+				"I-type (JALR)",
+				"./sim_pipeline/I-type(JALR)/imem_hex_jalr.txt",
+				"./sim_pipeline/I-type(JALR)/golden_reg_file_jalr.txt",
+				"./sim_pipeline/I-type(JALR)/observed_reg_file_hex.txt",
+				300
+			);
+		end
+	endtask
+
+	// Chạy test I-type (load)
+	task test_I_type_load;
+		begin
+			test_instruction_type(
+				"I-type (load)",
+				"./sim_pipeline/I-type(load)/imem_hex_lw.txt",
+				"./sim_pipeline/I-type(load)/golden_reg_file_lw.txt",
+				"./sim_pipeline/I-type(load)/observed_reg_file_hex.txt",
+				300
+			);
+		end
+	endtask
+
+	// Chạy test J-type
+	task test_J_type;
+		begin
+			test_instruction_type(
+				"J-type",
+				"./sim_pipeline/J-type/imem_hex.txt",
+				"./sim_pipeline/J-type/golden_reg_file_hex.txt",
+				"./sim_pipeline/J-type/observed_reg_file_hex.txt",
+				300
+			);
+		end
+	endtask
+
+	// Chạy test S-type
+	task test_S_type;
+		begin
+			test_instruction_type(
+				"S-type",
+				"./sim_pipeline/S-type/imem_hex.txt",
+				"./sim_pipeline/S-type/golden_reg_file_hex.txt",
+				"./sim_pipeline/S-type/observed_reg_file_hex.txt",
+				300
+			);
+		end
+	endtask
+
+	// Chạy test Hazard
+	task test_Hazard;
+		begin
+			test_instruction_type(
+				"Hazard",
+				"./sim_pipeline/Hazard/imem_hex.txt",
+				"./sim_pipeline/Hazard/golden_reg_file_hex.txt",
+				"./sim_pipeline/Hazard/observed_reg_file_hex.txt",
+				300
+			);
+		end
+	endtask
+
 
 	initial begin
 		total_error = 0;
@@ -115,11 +257,16 @@ module tb_pipeline_automated;
 		$display("RISC-V 5-Stage Pipeline Automated Testbench");
 		$display("==========================================");
 
-		// Chỉ chạy test R-type
-		test_R_type();
-
-		// Ghi lại kết quả thanh ghi quan sát được để tiện cập nhật golden nếu cần
-		dump_register_file_hex("./sim_pipeline/R-type/observed_reg_file_hex.txt");
+		// Chạy tất cả các test
+		// test_R_type();
+		// test_B_type();
+		test_U_type();
+		// test_I_type_arithmetic_logic();
+		test_I_type_JALR();
+		// test_I_type_load();
+		// test_J_type();
+		// test_S_type();
+		// test_Hazard();
 
 		$display("==========================================");
 		$display("Total error count: %0d", total_error);

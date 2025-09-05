@@ -18,7 +18,7 @@ module core (
 
     // Wires for control signals
     wire regwriteE, regwriteM, regwriteW;
-    wire memrwE, memrwM;
+    wire memrwE, memrwM, jalrE;
     wire pcselE, brunE, branchE, jumpE, bselE;
     wire [1:0] wbselE, wbselM, wbselW;
     wire [3:0] ALUselE;
@@ -84,7 +84,8 @@ module core (
         .rd1E(rd1E),
         .rd2E(rd2E),
         .pcE(pcE),
-        .pc4E(pc4E)
+        .pc4E(pc4E),
+        .jalrE(jalrE)
     );
 
     execute u_execute (
@@ -110,6 +111,7 @@ module core (
         .imm_exE(imm_exE),
         .pcE(pcE),
         .pc4E(pc4E),
+        .jalrE(jalrE),
 
         .regwriteM(regwriteM),
         .memrwM(memrwM),

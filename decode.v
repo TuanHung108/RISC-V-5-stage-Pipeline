@@ -1,3 +1,4 @@
+
 module decode (
     input clk, rst_n,
     input regwriteW,
@@ -8,7 +9,7 @@ module decode (
 
     output regwriteE, memrwE, 
     output brunE, branchE, jumpE,
-    output bselE,
+    output bselE, jalrE,
     output [1:0] wbselE,
     output [3:0] ALUselE,
     output [2:0] funct3E,
@@ -28,6 +29,8 @@ module decode (
     reg [31:0] pcD_reg, pc4D_reg;
     reg [31:0] rd1D_reg, rd2D_reg, imm_exD_reg;
     reg [14:0] control_signals;  
+    reg jalrD_reg;
+
 
     // Control Unit
     // ImmSel_RegWrite_BrUn_Branch_Jump_Bsel_ALUSel_MemRW_WBSel
@@ -37,10 +40,12 @@ module decode (
     wire [2:0] immselD;
     wire [3:0] aluselD;
     wire [4:0] rdD;
+    wire [31:0] rd1D_Utype;
 
     wire [6:0] opcode = instrD[6:0];
     wire [2:0] funct3 = instrD[14:12];
     wire [6:0] funct7 = instrD[31:25];
+    wire jalrD = (opcode == 7'b1100111); // jalr opcode
 
     assign rs1D = instrD[19:15];
     assign rs2D = instrD[24:20];
@@ -148,28 +153,20 @@ module decode (
     reg [31:0] reg_file [0:31];
     wire [31:0] rd1D, rd2D;
 
-
-    integer i;
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            for (i = 0; i < 32; i = i + 1)
-                reg_file[i] <= 32'd0;
-        end
-        else if (regwriteW && (rdW != 5'd0)) begin
+    always @(posedge clk) begin
+        if (regwriteW && (rdW != 5'd0)) begin
             reg_file[rdW] <= resultW;
         end
         reg_file[0] <= 32'h00000000;
     end
 
-    // assign rd1D = (!rst_n) ? 32'd0 : reg_file[instrD[19:15]];
-    // assign rd2D = (!rst_n) ? 32'd0 : reg_file[instrD[24:20]];
-
     wire write_wb_valid = regwriteW && (rdW != 5'd0);
     assign rd1D = (write_wb_valid && (rdW == rs1D)) ? resultW : reg_file[rs1D];
     assign rd2D = (write_wb_valid && (rdW == rs2D)) ? resultW : reg_file[rs2D];
-
-
+  
     // Register Logic
+    assign rd1D_Utype = (opcode == 7'b0010111) ? pcD :        // AUIPC: dùng PC
+                        (opcode == 7'b0110111) ? 32'd0 : rd1D; // LUI: dùng 0     
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             regwriteD_reg <= 1'b0;
@@ -189,6 +186,7 @@ module decode (
             rs1D_reg <= 5'd0;
             rs2D_reg <= 5'd0;
             funct3D_reg <= 3'd0;
+            jalrD_reg <= 1'b0;
         end
         else begin
             if(flushE) begin
@@ -209,6 +207,7 @@ module decode (
                 rs1D_reg <= 5'd0;
                 rs2D_reg <= 5'd0;
                 funct3D_reg <= 3'd0;
+                jalrD_reg <= 1'b0;
             end else begin
                 regwriteD_reg <= regwriteD;
                 memrwD_reg <= memrwD; 
@@ -220,17 +219,20 @@ module decode (
                 aluselD_reg <= aluselD;
                 pcD_reg <= pcD;
                 pc4D_reg <= pc4D;
-                rd1D_reg <= rd1D;
+                rd1D_reg <= rd1D_Utype;
                 rd2D_reg <= rd2D; 
                 imm_exD_reg <= imm_exD;
                 rdD_reg <= rdD;
                 rs1D_reg <= rs1D;
                 rs2D_reg <= rs2D;
                 funct3D_reg <= funct3;
+                jalrD_reg <= jalrD;
             end
         end
     end
 
+
+    assign jalrE = jalrD_reg;
     assign regwriteE = regwriteD_reg;
     assign memrwE = memrwD_reg;
     assign bselE = bselD_reg;
