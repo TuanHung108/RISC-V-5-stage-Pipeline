@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module riscv_tb;
+module tb_riscv;
     reg clk;
     reg rst_n;
     wire [31:0] instrF, pcF;

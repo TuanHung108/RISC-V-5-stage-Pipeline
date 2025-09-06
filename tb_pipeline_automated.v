@@ -117,8 +117,8 @@ endtask
 				end else if (DUT.core_inst.u_decode.reg_file[i] != golden_register_file[i]) begin
 					$display("Register mismatch at x%0d: DUT = %h, Golden = %h", i, DUT.core_inst.u_decode.reg_file[i], golden_register_file[i]);
 					error_count = error_count + 1;
-				end else begin
-					$display("Register x%0d correct: %h", i, DUT.core_inst.u_decode.reg_file[i]);
+				end else if (DUT.core_inst.u_decode.reg_file[i] != 32'b0) begin
+					$display("Register correct at x%0d: DUT = %h, Golden = %h", i, DUT.core_inst.u_decode.reg_file[i], golden_register_file[i]);
     			end
 			end
 
@@ -204,9 +204,10 @@ endtask
 		begin
 			test_instruction_type(
 				"I-type (load)",
-				"./sim_pipeline/I-type(load)/imem_hex_lw.txt",
-				"./sim_pipeline/I-type(load)/golden_reg_file_lw.txt",
-				"./sim_pipeline/I-type(load)/observed_reg_file_hex.txt",
+				
+				"./sim_pipeline/I-type/load/imem_hex_lw.txt",
+				"./sim_pipeline/I-type/load/golden_reg_file_lw.txt",
+				"./sim_pipeline/I-type/load/observed_reg_file_hex.txt",
 				300
 			);
 		end
@@ -316,7 +317,7 @@ endtask
 				end else if (DUT.core_inst.u_decode.reg_file[i] != golden_register_file[i]) begin
 					$display("Register mismatch at x%0d: DUT = %h, Golden = %h", i, DUT.core_inst.u_decode.reg_file[i], golden_register_file[i]);
 					error_count = error_count + 1;
-				end else begin
+				end else if (DUT.core_inst.u_decode.reg_file[i] != 32'b0) begin
 					$display("Register correct at x%0d: DUT = %h, Golden = %h", i, DUT.core_inst.u_decode.reg_file[i], golden_register_file[i]);
 				end
 			end
@@ -340,16 +341,16 @@ endtask
 		$display("==========================================");
 
 		// Chạy tất cả các test
-		// test_R_type();
-		// test_B_type();
-		// test_U_type();
-		// test_I_type_arithmetic_logic();
-		// test_I_type_JALR();
-		// test_I_type_load();
-		// test_J_type();
-		// test_S_type();
-		// test_Hazard();
-		test_Bubble_Sort();
+		test_R_type();
+		test_B_type();
+		test_U_type();
+		test_I_type_arithmetic_logic();
+		test_I_type_JALR();
+		test_I_type_load();
+		test_J_type();
+		test_S_type();
+		test_Hazard();
+		// test_Bubble_Sort();
 
 		$display("==========================================");
 		$display("Total error count: %0d", total_error);
