@@ -46,9 +46,6 @@ module execute (
 
     assign src_B = (bselE) ? imm_exE : src_B_inter;
 
-    wire [31:0] jalr_sum = src_A + imm_exE;
-    assign pcTargetE = jalrE ? { jalr_sum[31:1], 1'b0 }   // JALR: mask LSB
-                        : (pcE + imm_exE);              // JAL 
 
     localparam  ADD = 4'b0000,
                 SUB = 4'b0001,
@@ -78,7 +75,10 @@ module execute (
         endcase
     end
 
-
+    // JALR
+    wire [31:0] jalr_sum = src_A + imm_exE;
+    assign pcTargetE = jalrE ? { jalr_sum[31:1], 1'b0 }   // JALR: mask LSB
+                        : (pcE + imm_exE);              // JAL 
 
     // Branch Comp
     wire breqE, brltE;

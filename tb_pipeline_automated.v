@@ -117,7 +117,9 @@ endtask
 				end else if (DUT.core_inst.u_decode.reg_file[i] != golden_register_file[i]) begin
 					$display("Register mismatch at x%0d: DUT = %h, Golden = %h", i, DUT.core_inst.u_decode.reg_file[i], golden_register_file[i]);
 					error_count = error_count + 1;
-				end
+				end else begin
+					$display("Register x%0d correct: %h", i, DUT.core_inst.u_decode.reg_file[i]);
+    			end
 			end
 
 			if(error_count == 0) begin
@@ -249,6 +251,86 @@ endtask
 		end
 	endtask
 
+	// Khởi tạo data memory cho Bubble Sort
+	task init_bubble_sort_data_memory;
+    begin
+        // array: .word 5, 1, 4, 2, 8 tại địa chỉ 0x08
+        DUT.data_memory_inst.ram[2] = 32'd5; // 0x08
+        DUT.data_memory_inst.ram[3] = 32'd1; // 0x0C
+        DUT.data_memory_inst.ram[4] = 32'd4; // 0x10
+        DUT.data_memory_inst.ram[5] = 32'd2; // 0x14
+        DUT.data_memory_inst.ram[6] = 32'd8; // 0x18
+        // n: .word 5 tại địa chỉ 0x28
+        DUT.data_memory_inst.ram[10] = 32'd5; // 0x28
+    end
+endtask
+
+	// Chạy test Bubble Sort
+	task test_Bubble_Sort;
+    begin
+        test_instruction_type_bubble_sort(
+            "Bubble Sort",
+            "./sim_pipeline/Bubble_Sort/imem_hex.txt",
+            "./sim_pipeline/Bubble_Sort/golden_reg_file_hex.txt",
+            "./sim_pipeline/Bubble_Sort/observed_reg_file_hex.txt",
+            1000
+        );
+    end
+endtask
+
+// Task riêng cho Bubble Sort để khởi tạo data memory
+	task test_instruction_type_bubble_sort;
+		input [8*256-1:0] test_name;
+		input [8*256-1:0] imem_path;
+		input [8*256-1:0] golden_path;
+		input [8*256-1:0] observed_path;
+		input integer cycles;
+		integer error_count;
+		integer i;
+		begin
+			error_count = 0;
+
+			$display("%t Starting %s test...", $time, test_name);
+
+			// Reset hệ thống
+			rst_n = 0;
+			reset_imem();
+			reset_register_file();
+			reset_data_memory();
+			init_bubble_sort_data_memory(); // <-- chỉ Bubble Sort mới gọi
+			#(CLOCK_CYCLE);
+			@(negedge clk) rst_n = 1;
+
+			// Nạp chương trình vào instruction_memory
+			$readmemh(imem_path, instruction_memory);
+
+			// Chạy một số chu kỳ đủ lớn để chương trình thực thi
+			repeat (cycles) @(posedge clk);
+
+			// Nạp golden và so sánh
+			$readmemh(golden_path, golden_register_file);
+			for (i = 0; i < 32; i = i + 1) begin
+				if (^DUT.core_inst.u_decode.reg_file[i] === 1'bx || ^golden_register_file[i] === 1'bx) begin
+					$display("Register x%0d contains X! DUT = %h, Golden = %h", i, DUT.core_inst.u_decode.reg_file[i], golden_register_file[i]);
+					error_count = error_count + 1;
+				end else if (DUT.core_inst.u_decode.reg_file[i] != golden_register_file[i]) begin
+					$display("Register mismatch at x%0d: DUT = %h, Golden = %h", i, DUT.core_inst.u_decode.reg_file[i], golden_register_file[i]);
+					error_count = error_count + 1;
+				end else begin
+					$display("Register correct at x%0d: DUT = %h, Golden = %h", i, DUT.core_inst.u_decode.reg_file[i], golden_register_file[i]);
+				end
+			end
+
+			if(error_count == 0) begin
+				$display("%t %s test passed!", $time, test_name);
+			end else begin
+				$display("%t %s test failed with %0d errors.", $time, test_name, error_count);
+				total_error = total_error + error_count;
+			end
+
+			dump_register_file_hex(observed_path);
+		end
+	endtask
 
 	initial begin
 		total_error = 0;
@@ -260,13 +342,14 @@ endtask
 		// Chạy tất cả các test
 		// test_R_type();
 		// test_B_type();
-		test_U_type();
+		// test_U_type();
 		// test_I_type_arithmetic_logic();
-		test_I_type_JALR();
+		// test_I_type_JALR();
 		// test_I_type_load();
 		// test_J_type();
 		// test_S_type();
 		// test_Hazard();
+		test_Bubble_Sort();
 
 		$display("==========================================");
 		$display("Total error count: %0d", total_error);
